@@ -47,6 +47,24 @@ public class ProcessJUnitTest {
 
     @Test
     @Deployment(resources = "twitter_workflow.bpmn")
+    public void testTweetRejected() {
+
+        Map<String, Object> variables = new HashMap<String, Object>();
+        variables.put("approved", false);
+        variables.put("content", "test rejected Path - " + LocalDateTime.now().toString());
+
+
+        ProcessInstance processInstance = runtimeService()
+                .createProcessInstanceByKey("TwitterQAProcess")
+                .setVariables(variables)
+                .startAfterActivity("TweetBewertenTask")
+                .execute();
+
+        assertThat(processInstance).isEnded().hasPassed("TweetRejectedEndEvent");
+    }
+
+    @Test
+    @Deployment(resources = "twitter_workflow.bpmn")
     public void testHappyPath() throws TwitterException {
         // Init Mocks
         Mockito.when(twitterService.postTweet(Mockito.anyString())).thenReturn("Mock ID");
@@ -106,6 +124,10 @@ public class ProcessJUnitTest {
 
         Mockito.verify(twitterService).postTweet(Mockito.anyString());
     }
+
+
+
+
 
 
 }

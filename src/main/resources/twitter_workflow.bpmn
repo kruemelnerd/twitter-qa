@@ -19,10 +19,10 @@
     <bpmn:sequenceFlow id="NeinSequenceFlow" name="nein" sourceRef="TweetOkGateway" targetRef="TweetAbweisenTask">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">#{not approved}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:endEvent id="TweetAbgewiesenEndEvent" name="Tweet abgewiesen">
+    <bpmn:endEvent id="TweetRejectedEndEvent" name="Tweet abgewiesen">
       <bpmn:incoming>SequenceFlow_0o94twe</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_0o94twe" sourceRef="TweetAbweisenTask" targetRef="TweetAbgewiesenEndEvent" />
+    <bpmn:sequenceFlow id="SequenceFlow_0o94twe" sourceRef="TweetAbweisenTask" targetRef="TweetRejectedEndEvent" />
     <bpmn:sequenceFlow id="JaSequenceFlow" name="ja" sourceRef="TweetOkGateway" targetRef="TweetPostenTask">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">#{approved}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
@@ -85,7 +85,7 @@
           <dc:Bounds x="482" y="122" width="21" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="EndEvent_1hkq6s9_di" bpmnElement="TweetAbgewiesenEndEvent">
+      <bpmndi:BPMNShape id="EndEvent_1hkq6s9_di" bpmnElement="TweetRejectedEndEvent">
         <dc:Bounds x="682" y="122" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="671" y="165" width="59" height="27" />
