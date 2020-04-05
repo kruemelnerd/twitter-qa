@@ -16,13 +16,13 @@
       <bpmn:outgoing>JaSequenceFlow</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="SequenceFlow_1tggmwx" sourceRef="TweetBewertenTask" targetRef="TweetOkGateway" />
-    <bpmn:sequenceFlow id="NeinSequenceFlow" name="nein" sourceRef="TweetOkGateway" targetRef="TweetAbweisenTask">
+    <bpmn:sequenceFlow id="NeinSequenceFlow" name="nein" sourceRef="TweetOkGateway" targetRef="SendNotificationTask">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">#{not approved}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:endEvent id="TweetRejectedEndEvent" name="Tweet abgewiesen">
       <bpmn:incoming>SequenceFlow_0o94twe</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_0o94twe" sourceRef="TweetAbweisenTask" targetRef="TweetRejectedEndEvent" />
+    <bpmn:sequenceFlow id="SequenceFlow_0o94twe" sourceRef="SendNotificationTask" targetRef="TweetRejectedEndEvent" />
     <bpmn:sequenceFlow id="JaSequenceFlow" name="ja" sourceRef="TweetOkGateway" targetRef="TweetPostenTask">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">#{approved}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
@@ -30,11 +30,6 @@
       <bpmn:incoming>SequenceFlow_03j5nxy</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="SequenceFlow_03j5nxy" sourceRef="TweetPostenTask" targetRef="TweetGepostetEndEvent" />
-    <bpmn:scriptTask id="TweetAbweisenTask" name="Tweet abweisen" scriptFormat="javascript">
-      <bpmn:incoming>NeinSequenceFlow</bpmn:incoming>
-      <bpmn:outgoing>SequenceFlow_0o94twe</bpmn:outgoing>
-      <bpmn:script>print('Tweet abgewiesen');</bpmn:script>
-    </bpmn:scriptTask>
     <bpmn:serviceTask id="TweetPostenTask" name="Tweet posten" camunda:asyncBefore="true" camunda:delegateExpression="${createTweetDelegate}">
       <bpmn:incoming>JaSequenceFlow</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_03j5nxy</bpmn:outgoing>
@@ -53,6 +48,10 @@
       <bpmn:incoming>SequenceFlow_181j6rg</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1tggmwx</bpmn:outgoing>
     </bpmn:userTask>
+    <bpmn:serviceTask id="SendNotificationTask" name="Tweet abweisen" camunda:asyncBefore="true" camunda:type="external" camunda:topic="notification">
+      <bpmn:incoming>NeinSequenceFlow</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0o94twe</bpmn:outgoing>
+    </bpmn:serviceTask>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="TwitterQAProcess">
@@ -113,14 +112,14 @@
         <di:waypoint x="620" y="250" />
         <di:waypoint x="682" y="250" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="ScriptTask_0zs75ys_di" bpmnElement="TweetAbweisenTask">
-        <dc:Bounds x="520" y="100" width="100" height="80" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ServiceTask_1p1uy0z_di" bpmnElement="TweetPostenTask">
         <dc:Bounds x="520" y="210" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_015bpp7_di" bpmnElement="TweetBewertenTask">
         <dc:Bounds x="260" y="100" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1myndau_di" bpmnElement="SendNotificationTask">
+        <dc:Bounds x="520" y="100" width="100" height="80" />
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
