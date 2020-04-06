@@ -134,9 +134,65 @@ public class ProcessJUnitTest {
         assertThat(processInstance).isEnded().hasPassed("TweetGepostetEndEvent").variables().containsEntry("tweet-id",
                 "Mock ID");
 
-        Mockito.verify(twitterService).postTweet(Mockito.anyString());
+        Mockito.verify(twitterService).postTweet(variables.get("content").toString());
+        //Mockito.verify(twitterService).postTweet(Mockito.anyString());
     }
 
+    @Test
+    @Deployment(resources = "twitter_workflow.bpmn")
+    public void testSuperuserEventHandling() throws TwitterException {
+        // Init Mocks
+        Mockito.when(twitterService.postTweet(Mockito.anyString())).thenReturn("Mock ID");
+
+        Map<String, Object> variables = new HashMap<String, Object>();
+        variables.put("content", "My Exercise 11 Tweet - " + LocalDateTime.now().toString());
+
+
+        ProcessInstance processInstance = runtimeService()
+                .createMessageCorrelation("superuserTweet")
+                .setVariables(variables)
+                .correlateWithResult()
+                .getProcessInstance();
+
+        assertThat(processInstance).isStarted();
+        // Make Sure Task is created and waiting
+        assertThat(processInstance).isWaitingAt("TweetPostenTask");
+
+
+        List<Job> jobList = jobQuery()
+                .processInstanceId(processInstance.getId())
+                .list();
+        assertThat(jobList).hasSize(1);
+        Job job = jobList.get(0);
+        execute(job);
+
+        assertThat(processInstance).isEnded().hasPassed("TweetGepostetEndEvent").variables().containsEntry("tweet-id",
+                "Mock ID");
+
+        Mockito.verify(twitterService).postTweet(variables.get("content").toString());
+
+    }
+
+    @Test
+    @Deployment(resources = "twitter_workflow.bpmn")
+    public void testWithdrawnEventHandling(){
+        Map<String, Object> variables = new HashMap<String, Object>();
+        variables.put("content", "My withdrawn Tweet - " + LocalDateTime.now().toString());
+
+
+        ProcessInstance processInstance = runtimeService().startProcessInstanceByKey("TwitterQAProcess", variables);
+
+        // Make Sure Task is created and waiting
+        assertThat(processInstance).isStarted().isWaitingAt("TweetBewertenTask");
+
+        runtimeService()
+                .createMessageCorrelation("tweetWithdrawn")
+                .processInstanceId(processInstance.getId())
+                .correlateWithResult();
+
+
+        assertThat(processInstance).isEnded();
+    }
 
 
 
