@@ -61,6 +61,12 @@ public class ProcessJUnitTest {
                 .execute();
 
         assertThat(processInstance)
+                .isWaitingAt("SendNotificationTask");
+
+        // Complete Waiting Job
+        execute(job());
+
+        assertThat(processInstance)
                 .isWaitingAt("SendNotificationTask")
                 .externalTask()
                 .hasTopicName("notification");
